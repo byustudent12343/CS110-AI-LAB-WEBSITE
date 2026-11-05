@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>HomeLab Hub — Proxmox & Self-Hosting</title>
+  <meta name="description" content="An interactive guide to Proxmox VE and self-hosting your own services: explore apps, plan your lab's resources, and test your knowledge.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖥️</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav container">
+      <a href="#top" class="brand"><span class="brand-mark">▣</span> HomeLab Hub</a>
+      <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+      <ul class="nav-links">
+        <li><a href="#proxmox">Proxmox</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#builder">Lab Builder</a></li>
+        <li><a href="#quiz">VM or LXC?</a></li>
+        <li><a href="#checklist">Checklist</a></li>
+        <li><button id="theme-toggle" class="icon-btn" aria-label="Toggle color theme">◐</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow">Own your stack</p>
+          <h1>Run your own cloud with <span class="accent">Proxmox</span>.</h1>
+          <p class="lead">Proxmox VE is a free, open-source virtualization platform that turns a spare PC into a home data center. This site helps you learn the basics, pick services to self-host, and plan how much hardware you actually need.</p>
+          <div class="hero-actions">
+            <a href="#services" class="btn btn-primary">Explore services</a>
+            <a href="#builder" class="btn btn-ghost">Plan my lab →</a>
+          </div>
+        </div>
+        <div class="terminal" aria-label="Animated terminal demo">
+          <div class="terminal-bar"><span></span><span></span><span></span><em>root@pve:~</em></div>
+          <pre id="terminal-output"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROXMOX BASICS -->
+    <section id="proxmox" class="section">
+      <div class="container">
+        <h2>Proxmox in a nutshell</h2>
+        <p class="section-sub">Click a topic to learn more.</p>
+        <div class="tabs" role="tablist">
+          <button class="tab active" role="tab" data-tab="what">What is it?</button>
+          <button class="tab" role="tab" data-tab="vmlxc">VMs vs LXC</button>
+          <button class="tab" role="tab" data-tab="storage">Storage</button>
+          <button class="tab" role="tab" data-tab="backup">Backups</button>
+          <button class="tab" role="tab" data-tab="network">Networking</button>
+          <button class="tab" role="tab" data-tab="cluster">Clustering</button>
+        </div>
+
+        <div class="tab-panel active" data-panel="what">
+          <div class="two-col">
+            <div>
+              <h3>A bare-metal hypervisor with a friendly web UI</h3>
+              <p><strong>Proxmox Virtual Environment (PVE)</strong> is a Debian-based operating system you install directly onto a server. It combines two virtualization technologies — <strong>KVM</strong> for full virtual machines and <strong>LXC</strong> for lightweight Linux containers — and manages both from a web interface on port <code>8006</code>.</p>
+              <p>It's free and open-source (AGPLv3). An optional paid subscription gives access to the enterprise update repository and support, but the no-subscription repository works great for home labs.</p>
+            </div>
+            <ul class="fact-list">
+              <li><span>🖥️</span> Web UI at <code>https://&lt;your-ip&gt;:8006</code></li>
+              <li><span>🧱</span> KVM virtual machines + LXC containers</li>
+              <li><span>💾</span> ZFS, LVM-thin, Ceph, NFS, SMB and more</li>
+              <li><span>🔁</span> Built-in snapshots, backups &amp; live migration</li>
+              <li><span>🛡️</span> Integrated firewall &amp; user permissions</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="vmlxc">
+          <div class="compare">
+            <div class="compare-card">
+              <h3>🖥️ Virtual Machine (KVM)</h3>
+              <ul>
+                <li>Full, isolated computer with its own kernel</li>
+                <li>Runs any OS: Windows, BSD, Linux, appliances</li>
+                <li>Supports PCIe passthrough (GPUs, HBAs, NICs)</li>
+                <li>Stronger isolation, more overhead</li>
+              </ul>
+              <p class="muted">Best for: firewalls (OPNsense), NAS OSes (TrueNAS), Home Assistant OS, Windows, Docker hosts.</p>
+            </div>
+            <div class="compare-card">
+              <h3>📦 Container (LXC)</h3>
+              <ul>
+                <li>Shares the Proxmox host's Linux kernel</li>
+                <li>Linux-only, boots in seconds</li>
+                <li>Very low RAM &amp; CPU overhead</li>
+                <li>Easy bind-mounts of host storage</li>
+              </ul>
+              <p class="muted">Best for: lightweight Linux services such as Pi-hole, reverse proxies, media servers, small databases.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="storage">
+          <h3>Pick storage that fits your hardware</h3>
+          <div class="cards-3">
+            <div class="mini-card"><h4>ZFS</h4><p>Checksums, snapshots, compression and software RAID. Loves RAM and ECC memory. Great default for data you care about.</p></div>
+            <div class="mini-card"><h4>LVM-thin</h4><p>The installer's default on a single disk. Thin provisioning and snapshots with minimal overhead.</p></div>
+            <div class="mini-card"><h4>Ceph</h4><p>Distributed, replicated storage across 3+ nodes. Powerful, but needs fast networking and several disks.</p></div>
+            <div class="mini-card"><h4>NFS / SMB</h4><p>Mount shares from a NAS for ISOs, backups, or bulk media.</p></div>
+            <div class="mini-card"><h4>Directory</h4><p>Any mounted filesystem path. Simple and flexible for ISOs and backup files.</p></div>
+            <div class="mini-card"><h4>Tip</h4><p>Keep the OS/VMs on fast SSDs and bulk media on large HDDs.</p></div>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="backup">
+          <div class="two-col">
+            <div>
+              <h3>The 3-2-1 rule</h3>
+              <p>Keep <strong>3</strong> copies of your data, on <strong>2</strong> different types of media, with <strong>1</strong> copy off-site. Snapshots are <em>not</em> backups — they live on the same disk.</p>
+              <p>Proxmox includes <code>vzdump</code> for scheduled backups of any VM or container. For deduplicated, incremental, and verifiable backups, pair it with the free <strong>Proxmox Backup Server (PBS)</strong>.</p>
+            </div>
+            <pre class="code"><code># Back up container 101 to the "local" storage
+vzdump 101 --storage local --mode snapshot --compress zstd
+
+# Restore it as a new container 201
+pct restore 201 /var/lib/vz/dump/vzdump-lxc-101-*.tar.zst</code></pre>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="network">
+          <div class="two-col">
+            <div>
+              <h3>Linux bridges &amp; VLANs</h3>
+              <p>By default Proxmox creates a bridge called <code>vmbr0</code> attached to your physical NIC. Every VM and container connected to it appears on your LAN like a separate machine.</p>
+              <p>Make the bridge <em>VLAN-aware</em> to put services on separate networks (e.g. IoT, DMZ, management) using a VLAN tag on each guest's network device.</p>
+            </div>
+            <pre class="code"><code># /etc/network/interfaces (excerpt)
+auto vmbr0
+iface vmbr0 inet static
+    address 192.168.1.10/24
+    gateway 192.168.1.1
+    bridge-ports eno1
+    bridge-stp off
+    bridge-fd 0
+    bridge-vlan-aware yes
+    bridge-vids 2-4094</code></pre>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="cluster">
+          <h3>From one box to a cluster</h3>
+          <p>Join multiple Proxmox nodes into a cluster to manage them from one UI and migrate guests between them. For <strong>high availability (HA)</strong> you need quorum — at least 3 votes. Two-node setups can add a small external <em>QDevice</em> (even a Raspberry Pi) as the tie-breaker.</p>
+          <pre class="code"><code># On the first node
+pvecm create homelab
+# On each additional node
+pvecm add 192.168.1.10
+# Check status
+pvecm status</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" class="section alt">
+      <div class="container">
+        <h2>Service explorer</h2>
+        <p class="section-sub">Search and filter popular self-hosted apps. Click a card for details, and hit <strong>＋ Add</strong> to send it to your Lab Builder.</p>
+        <div class="toolbar">
+          <input type="search" id="service-search" placeholder="Search services… (e.g. photos, DNS, passwords)" aria-label="Search services">
+          <div class="chips" id="category-chips"></div>
+        </div>
+        <p class="result-count" id="result-count"></p>
+        <div class="service-grid" id="service-grid"></div>
+      </div>
+    </section>
+
+    <!-- BUILDER -->
+    <section id="builder" class="section">
+      <div class="container">
+        <h2>Lab builder</h2>
+        <p class="section-sub">Enter your host's specs and see whether your selected services will fit. Estimates are rough starting points — real usage varies.</p>
+        <div class="builder-grid">
+          <div class="panel">
+            <h3>Your host</h3>
+            <div class="preset-row">
+              <span class="muted">Presets:</span>
+              <button class="chip" data-preset="mini">Mini PC</button>
+              <button class="chip" data-preset="desktop">Old desktop</button>
+              <button class="chip" data-preset="server">Used server</button>
+            </div>
+            <label class="field">CPU threads <output id="cpu-out"></output>
+              <input type="range" id="host-cpu" min="2" max="64" step="2" value="8">
+            </label>
+            <label class="field">RAM (GB) <output id="ram-out"></output>
+              <input type="range" id="host-ram" min="4" max="256" step="4" value="32">
+            </label>
+            <label class="field">Storage (GB) <output id="disk-out"></output>
+              <input type="range" id="host-disk" min="128" max="16000" step="64" value="1000">
+            </label>
+            <p class="muted small">About 2 GB of RAM and 1 thread are reserved for Proxmox itself (more if you use ZFS).</p>
+            <label class="check"><input type="checkbox" id="use-zfs"> Using ZFS (reserve extra RAM for ARC cache)</label>
+          </div>
+
+          <div class="panel">
+            <h3>Resource usage</h3>
+            <div class="meter" id="meter-cpu"><div class="meter-label"><span>CPU</span><span class="meter-val"></span></div><div class="meter-track"><div class="meter-fill"></div></div></div>
+            <div class="meter" id="meter-ram"><div class="meter-label"><span>RAM</span><span class="meter-val"></span></div><div class="meter-track"><div class="meter-fill"></div></div></div>
+            <div class="meter" id="meter-disk"><div class="meter-label"><span>Storage</span><span class="meter-val"></span></div><div class="meter-track"><div class="meter-fill"></div></div></div>
+            <div class="verdict" id="verdict"></div>
+            <p class="muted small">CPU is shared between guests, so overcommitting vCPUs is normal. RAM is the resource that usually runs out first.</p>
+          </div>
+
+          <div class="panel span-2">
+            <div class="panel-head">
+              <h3>Selected services <span class="badge" id="selected-count">0</span></h3>
+              <div class="panel-actions">
+                <button class="btn btn-small btn-ghost" id="starter-pack">Load starter pack</button>
+                <button class="btn btn-small btn-ghost" id="export-plan">Copy plan</button>
+                <button class="btn btn-small btn-danger" id="clear-plan">Clear</button>
+              </div>
+            </div>
+            <div class="table-wrap"><table class="plan-table">
+              <thead><tr><th>ID</th><th>Service</th><th>Type</th><th>vCPU</th><th>RAM</th><th>Disk</th><th></th></tr></thead>
+              <tbody id="plan-body"></tbody>
+            </table></div>
+            <p class="empty-note" id="plan-empty">No services yet — add some from the <a href="#services">Service explorer</a> or load the starter pack.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="section alt">
+      <div class="container narrow">
+        <h2>Game: VM or LXC?</h2>
+        <p class="section-sub">For each scenario, choose the guest type most home-labbers would pick.</p>
+        <div class="quiz-card" id="quiz-card">
+          <div class="quiz-progress"><div id="quiz-progress-fill"></div></div>
+          <p class="quiz-count" id="quiz-count"></p>
+          <h3 id="quiz-question"></h3>
+          <div class="quiz-options">
+            <button class="btn quiz-btn" data-answer="VM">🖥️ VM</button>
+            <button class="btn quiz-btn" data-answer="LXC">📦 LXC</button>
+          </div>
+          <p class="quiz-feedback" id="quiz-feedback" aria-live="polite"></p>
+          <button class="btn btn-primary hidden" id="quiz-next">Next →</button>
+        </div>
+        <p class="muted small center" id="quiz-best"></p>
+      </div>
+    </section>
+
+    <!-- CHECKLIST -->
+    <section id="checklist" class="section">
+      <div class="container narrow">
+        <h2>Getting-started checklist</h2>
+        <p class="section-sub">Your progress is saved in this browser.</p>
+        <div class="progress-ring-wrap">
+          <svg class="progress-ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="52" class="ring-bg"/>
+            <circle cx="60" cy="60" r="52" class="ring-fg" id="ring-fg"/>
+          </svg>
+          <div class="ring-text" id="ring-text">0%</div>
+        </div>
+        <div id="checklist-groups"></div>
+        <div class="center"><button class="btn btn-small btn-ghost" id="reset-checklist">Reset checklist</button></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Built for learning. Proxmox® is a registered trademark of Proxmox Server Solutions GmbH; this site is not affiliated with it.</p>
+      <p class="muted small">Resource numbers are community rules of thumb, not official requirements.</p>
+    </div>
+  </footer>
+
+  <!-- Service detail modal -->
+  <dialog id="service-modal">
+    <button class="modal-close" aria-label="Close">✕</button>
+    <div id="modal-content"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
