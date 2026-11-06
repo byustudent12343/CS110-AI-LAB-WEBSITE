@@ -1,22 +1,103 @@
+/*
+  ============================================================================
+  styles.css — HOW THE WEBSITE LOOKS
+  ============================================================================
+  WHAT THIS FILE IS:
+    This is a CSS file. CSS (Cascading Style Sheets) is the language that
+    controls how a web page LOOKS: colors, fonts, sizes, spacing, and where
+    things sit on the screen. index.html says WHAT is on the page; this file
+    says how it should appear. index.html loads this file with a <link> tag.
+
+  HOW CSS IS WRITTEN — every block in this file is a "RULE" shaped like this:
+
+      selector { property: value; property: value; }
+
+    - SELECTOR: says WHICH elements the rule applies to. Common kinds:
+        p            every element of that tag type (here, every paragraph)
+        .btn         every element with class="btn"  (a dot means "class")
+        #toast       the one element with id="toast" (a # means "id")
+        .a .b        a .b element that is somewhere INSIDE a .a element
+        .a > .b      a .b element that is DIRECTLY inside a .a element
+        .a.b         an element that has BOTH classes a and b
+        a, b         a comma means "this rule applies to a AND to b"
+        :hover       a "pseudo-class": applies only in a certain state, e.g.
+                     while the mouse pointer is over the element
+        ::backdrop   a "pseudo-element": styles a part of an element rather
+                     than the whole thing
+    - PROPERTY: the thing you want to change (color, font-size, margin...).
+    - VALUE: what to set it to (red, 16px, 1rem...).
+    - The semicolon ; ends each property: value pair.
+
+  UNITS YOU'LL SEE:
+    px    pixels (tiny dots on the screen).
+    rem   a multiple of the page's base text size (1rem is usually 16px).
+    em    a multiple of the CURRENT element's text size.
+    %     a percentage of the containing element.
+    vw    a percentage of the browser window's width (100vw = full width).
+    ch    the width of the "0" character; handy for limiting line length.
+    fr    "fraction" of leftover space in a grid layout.
+    s     seconds (for animations); .2s means 0.2 seconds.
+    A number that starts with a dot, like .6, means 0.6.
+
+  COLORS: written as hex codes like #e57000 (a # followed by six digits/
+  letters describing the amounts of red, green and blue), or rgba(r, g, b, a)
+  where "a" (alpha) is transparency from 0 (invisible) to 1 (solid).
+
+  "CASCADING" means that when several rules affect the same element, the more
+  specific rule (or the one written later) wins.
+
+  This file is organized into sections, marked by "----- Name -----" headings,
+  in the same order the parts appear on the page.
+*/
+
+/*
+  ---------- Color theme variables (dark theme, the default) ----------
+  :root means the whole page (the <html> element).
+  Names that start with two dashes, like --bg, are CSS VARIABLES (also called
+  "custom properties"): named values you define once and reuse everywhere with
+  var(--bg). WHY: to change a color across the whole site you edit it in ONE
+  place, and switching themes just swaps these values.
+*/
 :root {
+  /* Page background, and a slightly lighter background for alternate sections. */
   --bg: #0f1218;
   --bg-alt: #151a22;
+  /* "Surfaces" are cards and panels that sit on top of the background. */
   --surface: #1b212b;
   --surface-2: #232b37;
+  /* Thin outline color around cards and between sections. */
   --border: #2d3644;
+  /* Main text color, and a dimmer grey for less important text. */
   --text: #e6e9ef;
   --muted: #9aa4b2;
+  /* The highlight/brand colors used for buttons, links and headings. */
   --accent: #e57000;      /* Proxmox-ish orange */
   --accent-2: #ff9a3c;
+  /* Status colors: green = good, yellow = warning, red = bad. Used by meters and the quiz. */
   --ok: #3fb950;
   --warn: #d29922;
   --bad: #f85149;
+  /* How rounded the corners of cards are. */
   --radius: 12px;
+  /* A soft drop-shadow: sideways offset, downward offset, blur amount, color. */
   --shadow: 0 8px 30px rgba(0, 0, 0, .35);
+  /*
+    A "monospace" font list (every letter the same width, like a typewriter),
+    used for code. The browser uses the first font in the list that the
+    visitor's computer has installed.
+  */
   --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+  /* Tells the browser that built-in parts (like scrollbars and form controls) should use dark colors. */
   color-scheme: dark;
 }
 
+/*
+  ---------- Light theme ----------
+  [data-theme="light"] is an ATTRIBUTE SELECTOR: it matches any element whose
+  data-theme attribute equals "light". When you click the ◐ button, app.js puts
+  data-theme="light" on the <html> element, and these values replace the dark
+  ones above. Every rule that uses var(--bg) etc. then updates automatically.
+*/
 [data-theme="light"] {
   --bg: #f7f8fa;
   --bg-alt: #eef1f5;
@@ -31,8 +112,26 @@
   color-scheme: light;
 }
 
+/*
+  ---------- Base styles (apply across the whole page) ----------
+  The * selector means "every element". box-sizing: border-box makes an
+  element's width INCLUDE its padding and border, which makes sizes much easier
+  to predict. (Padding is the space inside an element's edge; margin is the
+  space outside it.)
+*/
 * { box-sizing: border-box; }
+/*
+  scroll-behavior: smooth makes menu links glide to their section instead of
+  jumping. scroll-padding-top leaves 72px of room so the sticky header doesn't
+  cover the section's heading after scrolling.
+*/
 html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+/*
+  The <body>: remove the browser's default outer margin, choose fonts (the
+  visitor's normal system font), set the background and text colors from the
+  variables, and set line-height (the spacing between lines of text) to 1.6
+  times the font size for readability.
+*/
 body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
@@ -40,254 +139,521 @@ body {
   color: var(--text);
   line-height: 1.6;
 }
+/* All links use the lighter orange. */
 a { color: var(--accent-2); }
+/* Inline code snippets: code font, slightly smaller, with a shaded rounded background so they stand out. */
 code { font-family: var(--mono); font-size: .9em; background: var(--surface-2); padding: .1em .35em; border-radius: 4px; }
+/*
+  Headings h1 to h4: tighter line spacing than body text, and a gap below.
+  margin: 0 0 .6em lists four values in the order top, right, bottom, left.
+*/
 h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 .6em; }
+/*
+  clamp(min, preferred, max) picks a size that grows with the window width
+  (3vw) but never goes below 1.6rem or above 2.2rem. This keeps headings
+  readable on both phones and big monitors.
+*/
 h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); }
+
+/*
+  ---------- Reusable helper classes ----------
+  Small classes used throughout index.html and app.js.
+  .container: centers content and limits its width. min(1150px, 92%) means
+  "whichever is smaller", so it's 1150px wide on big screens and 92% of the
+  width on small ones. margin: 0 auto centers it (auto = equal left/right space).
+*/
 .container { width: min(1150px, 92%); margin: 0 auto; }
+/* .narrow: a thinner container, used by the quiz and checklist. */
 .narrow { width: min(760px, 92%); }
+/* .muted: dim grey text for less important information. */
 .muted { color: var(--muted); }
+/* .small: smaller text. */
 .small { font-size: .85rem; }
+/* .center: center-aligned text. */
 .center { text-align: center; }
+/*
+  .hidden: completely hides an element (display: none removes it from the
+  layout). !important forces this rule to win over any other rule, so adding
+  the "hidden" class ALWAYS hides things. app.js adds and removes this class.
+*/
 .hidden { display: none !important; }
+/* .accent: orange text, used for the word "Proxmox" in the main headline. */
 .accent { color: var(--accent-2); }
 
 /* ---------- Header ---------- */
+/*
+  The top bar.
+  position: sticky + top: 0 makes it stick to the top of the window while you
+  scroll. z-index controls stacking order: a higher number sits on top of
+  lower ones, so 50 keeps the header above the page content.
+  color-mix(...) blends the background color 85% with transparent, making the
+  bar slightly see-through, and backdrop-filter: blur blurs whatever scrolls
+  behind it (a "frosted glass" effect).
+*/
 .site-header {
   position: sticky; top: 0; z-index: 50;
   background: color-mix(in srgb, var(--bg) 85%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }
+/*
+  display: flex turns on FLEXBOX, a layout mode that places children in a row.
+  align-items: center lines them up vertically in the middle;
+  justify-content: space-between pushes the logo to the left and the menu to
+  the right, with the leftover space between them.
+*/
 .nav { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+/* The "HomeLab Hub" logo text: bold (font-weight 700), no underline. */
 .brand { font-weight: 700; color: var(--text); text-decoration: none; font-size: 1.1rem; }
+/* The ▣ symbol in the logo is orange. */
 .brand-mark { color: var(--accent); }
+/* The menu list: in a row, with 1.4rem gaps, bullets removed (list-style: none), default spacing removed. */
 .nav-links { display: flex; gap: 1.4rem; list-style: none; margin: 0; padding: 0; align-items: center; }
+/* Menu links: grey, not underlined, medium-bold. */
 .nav-links a { color: var(--muted); text-decoration: none; font-weight: 500; }
+/* When hovered, or marked "active" by app.js (the section you're viewing), a menu link turns full brightness. */
 .nav-links a:hover, .nav-links a.active { color: var(--text); }
+/* The ☰ phone-menu button is hidden on wide screens (the Responsive section at the bottom shows it on phones). */
 .nav-toggle { display: none; }
+/* Shared look for the small square buttons (◐ theme and ☰ menu). cursor: pointer shows the hand-shaped mouse pointer. */
 .icon-btn, .nav-toggle {
   background: var(--surface); color: var(--text); border: 1px solid var(--border);
   border-radius: 8px; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem;
 }
 
 /* ---------- Buttons & chips ---------- */
+/*
+  .btn: the base look for every button. Other classes below add variations.
+  "transition" makes changes animate smoothly over time instead of snapping:
+  here movement takes 0.1s and color changes take 0.2s.
+*/
 .btn {
   display: inline-block; padding: .7rem 1.2rem; border-radius: 10px; font-weight: 600;
   text-decoration: none; cursor: pointer; border: 1px solid var(--border);
   background: var(--surface); color: var(--text); font-size: .95rem; transition: transform .1s, background .2s, border-color .2s;
 }
+/* On hover, a button lifts up 1px (transform: translateY moves it vertically; negative = up) and gets an orange border. */
 .btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+/* .btn-primary: the main, most important button style — solid orange with white text (#fff is white). */
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-2); }
+/* .btn-ghost: a see-through button with just an outline, for less important actions. */
 .btn-ghost { background: transparent; }
+/* .btn-danger: turns red when hovered, warning that it deletes something (used by "Clear"). */
 .btn-danger:hover { border-color: var(--bad); color: var(--bad); }
+/* .btn-small: a smaller version of a button. */
 .btn-small { padding: .4rem .8rem; font-size: .85rem; }
+/*
+  .chip: small pill-shaped buttons (category filters and presets).
+  border-radius: 999px is a trick to get fully rounded ends.
+*/
 .chip {
   background: var(--surface); border: 1px solid var(--border); color: var(--muted);
   padding: .35rem .8rem; border-radius: 999px; cursor: pointer; font-size: .85rem; font-weight: 500;
 }
 .chip:hover { color: var(--text); }
+/* The currently selected chip (app.js adds the "active" class) is solid orange. */
 .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+/* .badge: the small orange counter pill next to "Selected services". vertical-align lines it up with the heading text. */
 .badge {
   display: inline-block; background: var(--accent); color: #fff; font-size: .75rem;
   padding: .1rem .5rem; border-radius: 999px; vertical-align: middle;
 }
 
 /* ---------- Hero ---------- */
+/*
+  The big introduction area at the top. padding: 5rem 0 4rem means 5rem on
+  top, 0 on the sides, 4rem on the bottom.
+  The background is two soft glowing blobs of color: radial-gradient draws a
+  color that fades out in a circle/oval (here an orange glow at the top right
+  and a blue glow at the bottom left).
+*/
 .hero {
   padding: 5rem 0 4rem;
   background:
     radial-gradient(800px 400px at 85% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
     radial-gradient(600px 300px at 0% 100%, color-mix(in srgb, #3b82f6 14%, transparent), transparent 70%);
 }
+/*
+  display: grid turns on CSS GRID, a layout mode that arranges children in
+  rows and columns. grid-template-columns: 1.1fr 1fr makes two columns, the
+  left one slightly wider. gap is the space between them.
+*/
 .hero-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 3rem; align-items: center; }
+/* The small "OWN YOUR STACK" label: all capitals (text-transform), spread-out letters (letter-spacing). */
 .eyebrow { text-transform: uppercase; letter-spacing: .15em; color: var(--accent-2); font-weight: 700; font-size: .8rem; margin: 0 0 .8rem; }
+/* The main headline's size, which grows and shrinks with the window (see clamp above). */
 h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); }
+/* The intro paragraph: a bit bigger and grey, never wider than about 55 characters so lines aren't too long to read. */
 .lead { font-size: 1.15rem; color: var(--muted); max-width: 55ch; }
+/* The row of two buttons. flex-wrap: wrap lets them drop onto a new line if there isn't room. */
 .hero-actions { display: flex; gap: .8rem; margin-top: 1.6rem; flex-wrap: wrap; }
 
+/*
+  The fake terminal window. It always uses dark colors (not the theme
+  variables) because real terminals are usually dark. overflow: hidden cuts off
+  anything that sticks out past the rounded corners.
+*/
 .terminal { background: #0b0d11; border: 1px solid #2a3240; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+/* The terminal's title bar along the top. */
 .terminal-bar { display: flex; gap: 6px; align-items: center; padding: .6rem .8rem; background: #161b22; }
+/* The three window dots: small squares made round with border-radius: 50%. All start red... */
 .terminal-bar span { width: 11px; height: 11px; border-radius: 50%; background: #f85149; }
+/* ...then :nth-child(2) (the second one) is made yellow and :nth-child(3) (the third) green. */
 .terminal-bar span:nth-child(2) { background: #d29922; }
 .terminal-bar span:nth-child(3) { background: #3fb950; }
+/* The "root@pve:~" title. margin-left: auto pushes it to the far right. font-style: normal undoes <em>'s italics. */
 .terminal-bar em { margin-left: auto; color: #8b949e; font-style: normal; font-size: .8rem; font-family: var(--mono); }
+/*
+  The text area of the terminal. min-height keeps it from changing size while
+  text is typed. white-space: pre-wrap keeps line breaks but wraps long lines.
+*/
 #terminal-output { margin: 0; padding: 1rem; min-height: 280px; font-family: var(--mono); font-size: .82rem; color: #c9d1d9; white-space: pre-wrap; }
+/* app.js wraps the "root@pve:~#" prompt in class "p" (green) and command output in class "o" (grey). */
 #terminal-output .p { color: #3fb950; }
 #terminal-output .o { color: #8b949e; }
+/*
+  The blinking cursor block after the typed text. "animation" runs the
+  "blink" animation (defined just below) every 1 second, forever (infinite).
+  steps(1) makes it switch on/off instantly instead of fading.
+*/
 .cursor { display: inline-block; width: 8px; background: #c9d1d9; animation: blink 1s steps(1) infinite; }
+/* @keyframes defines an animation: halfway through (50%) the element is invisible (opacity: 0). */
 @keyframes blink { 50% { opacity: 0; } }
 
 /* ---------- Sections ---------- */
+/* Vertical space above and below each main section. */
 .section { padding: 4.5rem 0; }
+/* Sections with BOTH classes "section" and "alt" get the alternate background, so neighbors look different. */
 .section.alt { background: var(--bg-alt); }
+/* The grey subtitle under each section heading. The negative top margin pulls it a little closer to the heading. */
 .section-sub { color: var(--muted); margin-top: -.3rem; margin-bottom: 1.8rem; }
 
 /* Tabs */
+/* The row of tab buttons, with a line underneath. */
 .tabs { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+/*
+  Each tab button: plain text look with no box. It has an invisible
+  (transparent) 2px bottom border that turns orange when selected. The -1px
+  bottom margin makes that border sit exactly on top of the row's line.
+*/
 .tab {
   background: none; border: none; color: var(--muted); padding: .7rem 1rem; cursor: pointer;
   font-size: .95rem; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px;
 }
 .tab:hover { color: var(--text); }
+/* The selected tab: orange text and orange underline. */
 .tab.active { color: var(--accent-2); border-bottom-color: var(--accent); }
+/* Every tab panel is hidden by default, and fades in (using "fade" below) over 0.25 seconds when shown. */
 .tab-panel { display: none; animation: fade .25s ease; }
+/* Only the panel with class "active" is shown. app.js moves the "active" class when a tab is clicked. */
 .tab-panel.active { display: block; }
+/* The "fade" animation: start invisible and 6px lower, end fully visible in its normal spot. */
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
+/* A two-column layout used inside several tab panels. align-items: start lines items up at the top. */
 .two-col { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2rem; align-items: start; }
+/* The list of quick facts, stacked with small gaps and no bullets. */
 .fact-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .6rem; }
+/* Each fact is a small card with the emoji and text side by side. */
 .fact-list li { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: .7rem 1rem; display: flex; gap: .7rem; align-items: center; }
+/* The VM vs LXC comparison: two equal columns. */
 .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+/* Shared "card" look for comparison cards, storage mini cards, and Lab Builder panels. */
 .compare-card, .mini-card, .panel {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.4rem;
 }
+/* Indent the bulleted list inside comparison cards. */
 .compare-card ul { padding-left: 1.2rem; }
+/* A grid of 3 equal columns. repeat(3, 1fr) is shorthand for "1fr 1fr 1fr". */
 .cards-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+/* Mini card titles in orange; mini card text in grey. */
 .mini-card h4 { color: var(--accent-2); margin-bottom: .3rem; }
 .mini-card p { margin: 0; color: var(--muted); font-size: .95rem; }
+/*
+  The dark boxes that show example commands in the tab panels.
+  overflow-x: auto adds a sideways scrollbar if a line is too long, instead
+  of breaking the layout.
+*/
 .code {
   background: #0b0d11; color: #c9d1d9; border: 1px solid #2a3240; border-radius: 10px;
   padding: 1rem; overflow-x: auto; font-size: .82rem; margin: 0;
 }
+/* Inside those boxes, remove the shaded background that inline <code> normally gets (it would look doubled). */
 .code code { background: none; padding: 0; }
 
 /* ---------- Services ---------- */
+/* The search box and category chips, stacked vertically (flex-direction: column). */
 .toolbar { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem; }
+/* The search box: full width, rounded, using theme colors. */
 #service-search {
   width: 100%; padding: .85rem 1rem; border-radius: 10px; border: 1px solid var(--border);
   background: var(--surface); color: var(--text); font-size: 1rem;
 }
+/*
+  :focus means "while this element is selected for typing". An orange outline
+  shows clearly where you're typing; this matters for keyboard users.
+*/
 #service-search:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* The category chips wrap onto multiple lines when needed. */
 .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+/* The "27 of 27 services" text. */
 .result-count { color: var(--muted); font-size: .9rem; }
+/*
+  The card grid. repeat(auto-fill, minmax(250px, 1fr)) means "fit as many
+  columns as possible, each at least 250px wide, sharing any extra space".
+  WHY: the number of columns adjusts automatically to the screen width.
+*/
 .service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+/* One service card: its contents are stacked vertically. */
 .service-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   padding: 1.2rem; cursor: pointer; display: flex; flex-direction: column; gap: .5rem;
   transition: transform .15s, border-color .15s, box-shadow .15s;
 }
+/*
+  When hovered, or selected with the keyboard (:focus-visible), a card lifts
+  up, gets an orange border and a shadow. outline: none removes the default
+  focus outline because the orange border already shows it's selected.
+*/
 .service-card:hover, .service-card:focus-visible { transform: translateY(-3px); border-color: var(--accent); box-shadow: var(--shadow); outline: none; }
+/* The card's top row: emoji next to the name. */
 .service-card .top { display: flex; align-items: center; gap: .7rem; }
 .service-card .emoji { font-size: 1.8rem; }
 .service-card h3 { font-size: 1.05rem; margin: 0; }
+/* The category name under the service name. */
 .service-card .cat { font-size: .75rem; color: var(--muted); }
+/* The description. flex: 1 lets it stretch to fill spare space, so the bottom row lines up across cards of different heights. */
 .service-card p { margin: 0; color: var(--muted); font-size: .9rem; flex: 1; }
+/* The card's bottom row: type tag on the left, Add button on the right. */
 .service-card .foot { display: flex; justify-content: space-between; align-items: center; margin-top: .4rem; }
+/* The small "VM" / "LXC" label. */
 .type-tag { font-size: .72rem; font-weight: 700; padding: .15rem .5rem; border-radius: 6px; font-family: var(--mono); }
+/* VM tags are blue and LXC tags are green, so you can tell them apart at a glance. */
 .type-tag.VM { background: color-mix(in srgb, #3b82f6 20%, transparent); color: #60a5fa; }
 .type-tag.LXC { background: color-mix(in srgb, var(--ok) 20%, transparent); color: var(--ok); }
+/* The "＋ Add" button on each card is smaller than a normal button. */
 .add-btn { font-size: .8rem; padding: .3rem .7rem; }
+/* Once a service is added, app.js adds the "added" class and the button turns green ("✓ Added"). */
 .add-btn.added { background: var(--ok); border-color: var(--ok); color: #fff; }
 
 /* Modal */
+/* The pop-up window for service details. 92vw = 92% of the window width, so it fits on phones. */
 dialog {
   border: 1px solid var(--border); border-radius: 16px; background: var(--surface); color: var(--text);
   width: min(620px, 92vw); padding: 2rem; box-shadow: var(--shadow);
 }
+/* ::backdrop is the area behind an open pop-up. Here it's darkened and blurred to focus attention on the pop-up. */
 dialog::backdrop { background: rgba(0, 0, 0, .6); backdrop-filter: blur(3px); }
+/*
+  The ✕ close button. position: absolute places it at an exact spot (1rem
+  from the top and right edges of the pop-up) instead of in the normal flow.
+*/
 .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; }
+/* The pop-up's top row: big emoji next to the title. */
 .modal-head { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; }
 .modal-title { margin: 0; }
 .modal-head .emoji { font-size: 2.6rem; }
+/* The row of four spec boxes (vCPU, RAM, Disk, Guest type). */
 .spec-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; margin: 1rem 0; }
 .spec { background: var(--surface-2); border-radius: 8px; padding: .6rem; text-align: center; }
+/* The number is big and on its own line (display: block); the label underneath is small and grey. */
 .spec strong { display: block; font-size: 1.1rem; }
 .spec span { font-size: .75rem; color: var(--muted); }
+/* The buttons at the bottom of the pop-up. */
 .modal-actions { display: flex; gap: .6rem; margin-top: 1.2rem; flex-wrap: wrap; }
 
 /* ---------- Builder ---------- */
+/*
+  Two equal columns. minmax(0, 1fr) (instead of plain 1fr) lets columns shrink
+  smaller than their content, which stops a wide table from stretching the page.
+*/
 .builder-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.2rem; }
+/* The > means panels DIRECTLY inside the grid. min-width: 0 also helps them shrink properly. */
 .builder-grid > .panel { min-width: 0; }
+/* Lets the services table scroll sideways on small screens. */
 .table-wrap { overflow-x: auto; }
+/* Makes an element stretch across 2 grid columns (used by the Selected services panel). */
 .span-2 { grid-column: span 2; }
+/* The row of preset buttons. */
 .preset-row { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+/* Each slider's label sits on its own line, bold. */
 .field { display: block; margin-bottom: 1rem; font-weight: 600; }
+/* The current slider value floats over to the right side, in orange code font. */
 .field output { float: right; color: var(--accent-2); font-family: var(--mono); }
+/* input[type=range] selects every slider. accent-color tints the browser's built-in slider orange. */
 input[type=range] { width: 100%; accent-color: var(--accent); margin-top: .4rem; }
+/* The ZFS checkbox line. */
 .check { display: flex; gap: .5rem; align-items: center; font-size: .92rem; cursor: pointer; }
 .check input { accent-color: var(--accent); width: 18px; height: 18px; }
+/* The usage meters (progress bars). */
 .meter { margin-bottom: 1.1rem; }
+/* The meter's label row: name on the left, numbers on the right. */
 .meter-label { display: flex; flex-wrap: wrap; gap: .3rem; justify-content: space-between; font-weight: 600; font-size: .92rem; margin-bottom: .3rem; }
 .meter-val { font-family: var(--mono); color: var(--muted); font-weight: 400; }
+/* The grey track (background bar). overflow: hidden keeps the colored fill inside its rounded ends. */
 .meter-track { height: 12px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+/* The colored fill. It starts at width 0; app.js sets its width. The transition animates width and color changes. Green by default. */
 .meter-fill { height: 100%; width: 0; background: var(--ok); border-radius: 999px; transition: width .4s ease, background .3s; }
+/* app.js adds "warn" (yellow) when usage is getting high and "bad" (red) when it's over the limit. */
 .meter-fill.warn { background: var(--warn); }
 .meter-fill.bad { background: var(--bad); }
+/* The verdict message box, with a colored stripe down its left side: green normally... */
 .verdict { padding: .8rem 1rem; border-radius: 10px; background: var(--surface-2); font-weight: 600; margin: 1rem 0 .5rem; border-left: 4px solid var(--ok); }
+/* ...yellow for "tight", red for "over capacity". */
 .verdict.warn { border-left-color: var(--warn); }
 .verdict.bad { border-left-color: var(--bad); }
+/* The Selected services panel's header row: title on the left, action buttons on the right. */
 .panel-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .6rem; margin-bottom: .6rem; }
 .panel-head h3 { margin: 0; }
 .panel-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+/* The plan table. border-collapse: collapse merges neighboring cell borders into single lines. */
 .plan-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+/* Table column titles: small grey capitals with a line underneath. */
 .plan-table th { text-align: left; color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; padding: .5rem; border-bottom: 1px solid var(--border); }
+/* Table cells (td = "table data"): a line under each row. */
 .plan-table td { padding: .55rem .5rem; border-bottom: 1px solid var(--border); }
+/* Number columns use the code font so the digits line up. */
 .plan-table td.mono { font-family: var(--mono); }
+/* The ✕ remove button in each row: plain, turning red when hovered. */
 .remove-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; }
 .remove-btn:hover { color: var(--bad); }
+/* The "No services yet" message. */
 .empty-note { color: var(--muted); text-align: center; padding: 1.5rem 0 .5rem; }
 
 /* ---------- Quiz ---------- */
+/* The quiz box. */
 .quiz-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; text-align: center; }
+/* The thin progress bar's track. */
 .quiz-progress { height: 6px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin-bottom: 1rem; }
+/* On the results screen, app.js gives the fill the "full" class so the bar is 100% wide. */
 #quiz-progress-fill.full { width: 100%; }
+/* The orange fill. It starts at width 0; app.js grows it as you answer questions. */
 #quiz-progress-fill { height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+/* "Question 1 of 10 · Score 0" */
 .quiz-count { color: var(--muted); font-size: .85rem; margin: 0 0 .5rem; }
+/* The question text. min-height reserves room for about 3 lines, so the buttons don't jump around when question lengths differ. */
 #quiz-question { font-size: 1.3rem; min-height: 3em; display: flex; align-items: center; justify-content: center; }
+/* The VM / LXC answer buttons, side by side and centered. */
 .quiz-options { display: flex; gap: 1rem; justify-content: center; margin: 1.2rem 0; }
 .quiz-btn { min-width: 130px; font-size: 1.05rem; padding: .9rem 1.4rem; }
+/* After answering, app.js marks the right answer green ("correct") and a wrong pick red ("wrong"). */
 .quiz-btn.correct { background: var(--ok); border-color: var(--ok); color: #fff; }
 .quiz-btn.wrong { background: var(--bad); border-color: var(--bad); color: #fff; }
+/* :disabled means the button can't be clicked (after you've answered); it stops looking clickable and stops lifting up. */
 .quiz-btn:disabled { cursor: default; transform: none; }
+/* The feedback text. min-height keeps space reserved even when it's empty. */
 .quiz-feedback { min-height: 3em; color: var(--muted); }
+/* The big "8 / 10" score on the results screen (font-weight 800 = extra bold). */
 .quiz-score { font-size: 3rem; font-weight: 800; color: var(--accent-2); margin: .5rem 0; }
 
 /* ---------- Checklist ---------- */
+/*
+  The box around the progress ring. position: relative lets the percentage
+  text (below) be positioned on top of the ring.
+*/
 .progress-ring-wrap { position: relative; width: 130px; height: 130px; margin: 0 auto 2rem; }
+/* Rotated -90 degrees so the ring fills from the top (12 o'clock) instead of from the right (3 o'clock). */
 .progress-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+/*
+  The circles in the ring. For SVG shapes, "fill" is the inside color (none
+  here) and "stroke" is the outline color and thickness.
+*/
 .ring-bg { fill: none; stroke: var(--surface-2); stroke-width: 10; }
+/*
+  The orange progress circle. This uses a common trick:
+  - stroke-dasharray: 326.7 turns the outline into a dash exactly as long as
+    the circle's circumference (the distance around it: 2 x pi x 52 = 326.7).
+  - stroke-dashoffset: 326.7 slides that dash completely out of view, so at
+    the start no orange shows.
+  app.js lowers the offset as you tick items, revealing more of the ring.
+  stroke-linecap: round gives the orange line rounded ends.
+*/
 .ring-fg { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round; stroke-dasharray: 326.7; stroke-dashoffset: 326.7; transition: stroke-dashoffset .5s ease; }
+/*
+  The percentage text in the middle. position: absolute with inset: 0 makes it
+  cover the whole ring area; display: grid + place-items: center centers it.
+*/
 .ring-text { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1.6rem; font-weight: 800; }
+/* Each checklist group is a collapsible card (a <details> element made by app.js). */
 .check-group { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; overflow: hidden; }
+/* <summary> is the clickable title row that opens and closes a <details> group. list-style: none hides the default arrow. */
 .check-group summary { padding: 1rem 1.2rem; cursor: pointer; font-weight: 700; display: flex; justify-content: space-between; list-style: none; }
+/* Safari and Chrome-based browsers draw the default arrow differently, so it's hidden separately here. */
 .check-group summary::-webkit-details-marker { display: none; }
+/* The "2/4" count on the right of each group title. */
 .check-group summary .count { color: var(--muted); font-weight: 500; font-size: .9rem; }
 .check-group ul { list-style: none; margin: 0; padding: 0 1.2rem 1rem; }
+/* A line between each checklist item. */
 .check-group li { padding: .45rem 0; border-top: 1px solid var(--border); }
+/* The checkbox and its text side by side, aligned at the top (for items that wrap onto two lines). */
 .check-group li label { display: flex; gap: .7rem; align-items: flex-start; cursor: pointer; }
+/* The checkboxes: orange, a set size, and flex-shrink: 0 stops them getting squished by long text. */
 .check-group li input { margin-top: .3rem; accent-color: var(--accent); width: 17px; height: 17px; flex-shrink: 0; }
+/* Finished items (app.js adds the "done" class) get crossed out and dimmed. */
 .check-group li.done span { text-decoration: line-through; color: var(--muted); }
 
 /* ---------- Footer & toast ---------- */
+/* The footer at the bottom of the page. */
 .site-footer { border-top: 1px solid var(--border); padding: 2rem 0; color: var(--muted); font-size: .9rem; text-align: center; }
+/*
+  The toast pop-up message. position: fixed keeps it in place on the screen
+  even while scrolling. left: 50% plus translate(-50%, ...) centers it
+  horizontally. The 150% in translate pushes it down below the bottom edge of
+  the screen, so it's hidden by default. z-index: 100 keeps it on top of
+  everything, even the header.
+*/
 .toast {
   position: fixed; bottom: 1.5rem; left: 50%; transform: translate(-50%, 150%);
   background: var(--surface); border: 1px solid var(--accent); color: var(--text);
   padding: .7rem 1.2rem; border-radius: 10px; box-shadow: var(--shadow); transition: transform .3s ease; z-index: 100;
 }
+/* When app.js adds the "show" class, the toast slides up into view (the transition above animates the slide). */
 .toast.show { transform: translate(-50%, 0); }
 
 /* ---------- Responsive ---------- */
+/*
+  "Responsive" design means the page rearranges itself to suit the screen size.
+  @media (max-width: 860px) is a MEDIA QUERY: the rules inside only apply when
+  the browser window is 860px wide or narrower (tablets and phones).
+*/
 @media (max-width: 860px) {
+  /* Change all the multi-column layouts into a single column, so things stack instead of squeezing. */
   .hero-grid, .two-col, .compare, .builder-grid { grid-template-columns: minmax(0, 1fr); }
   .panel { padding: 1.1rem; }
   .plan-table { font-size: .85rem; }
+  /* With only one column, the Selected services panel no longer needs to span two. */
   .span-2 { grid-column: auto; }
+  /* The storage cards go from 3 columns to 2. */
   .cards-3 { grid-template-columns: 1fr 1fr; }
+  /* Show the ☰ menu button. */
   .nav-toggle { display: block; }
+  /*
+    Hide the menu links and turn them into a drop-down panel just below the
+    header (top: 60px), stretching edge to edge (left: 0; right: 0), with the
+    links stacked vertically.
+  */
   .nav-links {
     display: none; position: absolute; top: 60px; left: 0; right: 0; flex-direction: column;
     background: var(--bg); border-bottom: 1px solid var(--border); padding: 1rem; gap: 1rem;
   }
+  /* When ☰ is tapped, app.js adds the "open" class and the drop-down appears. */
   .nav-links.open { display: flex; }
+  /* Hide the first column (ID) of the plan table to save space on small screens. */
   .plan-table th:nth-child(1), .plan-table td:nth-child(1) { display: none; }
 }
+/* For very narrow screens (phones, 520px or less): */
 @media (max-width: 520px) {
+  /* Storage cards and spec boxes go to 2 columns. */
   .cards-3, .spec-row { grid-template-columns: 1fr 1fr; }
+  /* The VM / LXC quiz buttons stack on top of each other. */
   .quiz-options { flex-direction: column; }
 }
+/*
+  ACCESSIBILITY: some people set their computer to "reduce motion" because
+  movement on screen can make them feel dizzy or sick. This media query detects
+  that setting and turns off all animations, transitions, and smooth scrolling.
+*/
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
   html { scroll-behavior: auto; }
